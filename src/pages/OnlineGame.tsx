@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import GameRoom from "../components/GameRoom";
+import { GamesList } from "../components/GamesList";
+import { useApi } from "../hooks/useApi";
+import { createGame } from "../core/api";
 import styles from "./OnlineGame.module.scss";
 
 const OnlineGame: React.FC = () => {
@@ -11,6 +14,14 @@ const OnlineGame: React.FC = () => {
     gameId?: string;
   } | null>(null);
   const [friendGameId, setFriendGameId] = useState("");
+  const [showGamesList, setShowGamesList] = useState(false);
+
+  // API для создания игры
+  const {
+    loading: creatingGame,
+    error: createGameError,
+    execute: executeCreateGame,
+  } = useApi(createGame);
 
   const handleBack = () => {
     navigate("/");
@@ -33,6 +44,25 @@ const OnlineGame: React.FC = () => {
   const handleBackToMenu = () => {
     setCurrentGame(null);
     setFriendGameId("");
+    setShowGamesList(false);
+  };
+
+  const handleShowGamesList = () => {
+    setShowGamesList(true);
+  };
+
+  const handleGameJoined = (gameId: number) => {
+    // После успешного присоединения к игре, показываем игровую комнату
+    setCurrentGame({ type: "friend", gameId: gameId.toString() });
+    setShowGamesList(false);
+  };
+
+  const handleCreateGame = async () => {
+    const newGame = await executeCreateGame();
+    if (newGame) {
+      // После создания игры, переходим к игровой комнате
+      setCurrentGame({ type: "friend", gameId: newGame.id.toString() });
+    }
   };
 
   if (currentGame) {
@@ -51,6 +81,25 @@ const OnlineGame: React.FC = () => {
     );
   }
 
+  if (showGamesList) {
+    return (
+      <div className={styles.onlineGame}>
+        <div className={styles.gamesListContainer}>
+          <h1 className={styles.onlineGameTitle}>Доступные игры</h1>
+          <GamesList onGameJoined={handleGameJoined} />
+          <Button
+            variant="outline"
+            size="medium"
+            onClick={handleBackToMenu}
+            className={styles.backButton}
+          >
+            ← Назад в меню
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.onlineGame}>
       <div className={styles.onlineGameContainer}>
@@ -60,6 +109,22 @@ const OnlineGame: React.FC = () => {
           <div className={styles.onlineGameButtons}>
             <Button
               variant="primary"
+              size="large"
+              onClick={handleCreateGame}
+              disabled={creatingGame}
+              className={styles.onlineGameButton}
+            >
+              {creatingGame ? "Создание игры..." : "➕ Создать игру"}
+            </Button>
+
+            {createGameError && (
+              <div className={styles.errorMessage}>
+                Ошибка создания игры: {createGameError}
+              </div>
+            )}
+
+            <Button
+              variant="secondary"
               size="large"
               onClick={handleRatedGame}
               className={styles.onlineGameButton}
@@ -74,6 +139,15 @@ const OnlineGame: React.FC = () => {
               className={styles.onlineGameButton}
             >
               Быстрая игра
+            </Button>
+
+            <Button
+              variant="outline"
+              size="large"
+              onClick={handleShowGamesList}
+              className={styles.onlineGameButton}
+            >
+              📋 Список игр
             </Button>
 
             <div className={styles.friendGameSection}>

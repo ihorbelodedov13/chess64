@@ -41,6 +41,7 @@ $box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 
 .homeContainer {
   @include container-style;
+  position: relative;
 }
 
 .homeTitle {
@@ -75,6 +76,44 @@ $box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 
 .miscButton {
   margin-top: 10px;
+}
+
+.profileBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid #667eea;
+  background: white;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  span {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
 }
 
 // Адаптивность

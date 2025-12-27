@@ -1,0 +1,269 @@
+.profile {
+  min-height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.header {
+  margin-bottom: 30px;
+
+  h1 {
+    color: white;
+    font-size: 2rem;
+    margin: 15px 0;
+    text-align: center;
+  }
+}
+
+.backButton {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.noUser {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  h2 {
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+}
+
+.hint {
+  background: #f0f7ff;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  text-align: left;
+
+  p {
+    margin: 0;
+    color: #333;
+  }
+
+  code {
+    background: #e0e7ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 0.9em;
+  }
+}
+
+.statsSection {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+
+  h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+  }
+}
+
+.statsLoading {
+  text-align: center;
+  padding: 20px;
+  color: #667eea;
+  font-style: italic;
+}
+
+.statsError {
+  text-align: center;
+  padding: 20px;
+  color: #e74c3c;
+  background: #fee;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.statCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.statLabel {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.statValue {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.online {
+  color: #4caf50;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.offline {
+  color: #9e9e9e;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.additionalInfo {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+
+  h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+  }
+}
+
+.infoItem {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  color: #666;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  strong {
+    color: #333;
+    margin-right: 10px;
+  }
+}
+
+.debugInfo {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  border: 1px solid #dee2e6;
+
+  summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #495057;
+    user-select: none;
+    padding: 5px;
+
+    &:hover {
+      color: #667eea;
+    }
+  }
+
+  pre {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border: 1px solid #dee2e6;
+    color: #212529;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .noUser {
+    padding: 25px;
+  }
+
+  .statsSection {
+    padding: 20px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .statCard {
+    padding: 15px;
+  }
+
+  .statValue {
+    font-size: 1.3rem;
+  }
+
+  .additionalInfo {
+    padding: 20px;
+  }
+}

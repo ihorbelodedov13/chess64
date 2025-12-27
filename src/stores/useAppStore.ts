@@ -1,17 +1,15 @@
 import { create } from "zustand";
+import type { UserResponse } from "../types/api";
 
 interface AppState {
   currentPage: string;
   isLoading: boolean;
-  user: {
-    name: string;
-    rating: number;
-  } | null;
+  user: UserResponse | null;
 
   // Actions
   setCurrentPage: (page: string) => void;
   setLoading: (loading: boolean) => void;
-  setUser: (user: { name: string; rating: number } | null) => void;
+  setUser: (user: UserResponse | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({

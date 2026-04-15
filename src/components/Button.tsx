@@ -4,7 +4,7 @@ import styles from "./Button.module.scss";
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "outline";
+  variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "small" | "medium" | "large";
   disabled?: boolean;
   className?: string;
@@ -26,6 +26,8 @@ const Button: React.FC<ButtonProps> = ({
         return styles.btnSecondary;
       case "outline":
         return styles.btnOutline;
+      case "ghost":
+        return styles.btnGhost;
       default:
         return styles.btnPrimary;
     }

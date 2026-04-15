@@ -1,0 +1,173 @@
+$bg:     #151617;
+$card:   #191516;
+$border: rgba(84,84,88,.45);
+$accent: #EF4E05;
+$text:   #fff;
+$sub:    rgba(255,255,255,.5);
+
+.page {
+  min-height: 100vh;
+  width: 100%;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+}
+
+.topBar {
+  width: 100%;
+  max-width: 480px;
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: $sub;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: none;
+  letter-spacing: .01em;
+  transition: color .15s;
+  &:hover { color: $text; }
+}
+
+.header {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 20px 24px;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  color: $sub;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+// ── Live preview ─────────────────────────────────────────────────────────
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: $card;
+  border: 1px solid $border;
+  border-radius: 20px;
+  width: calc(100% - 40px);
+  max-width: 440px;
+}
+
+.previewLabel {
+  color: $sub;
+  font-size: 0.85rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+// ── Frame grid ───────────────────────────────────────────────────────────
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: calc(100% - 40px);
+  max-width: 440px;
+}
+
+.frameCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px 14px;
+  background: $card;
+  border: 1.5px solid $border;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+  font-family: inherit;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(239,78,5,.45);
+    background: rgba(239,78,5,.06);
+  }
+
+  &:disabled { opacity: .6; cursor: default; }
+}
+
+.active {
+  border-color: $accent !important;
+  background: rgba(239,78,5,.1) !important;
+}
+
+.framePreview {
+  // Extra space so frame image doesn't clip
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  overflow: visible;
+}
+
+.frameName {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.frameBadge {
+  font-size: 0.68rem;
+  color: #4ade80;
+  background: rgba(74,222,128,.12);
+  border: 1px solid rgba(74,222,128,.25);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.activeCheck {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.8rem;
+  color: $accent;
+  font-weight: 700;
+}
+
+// ── Avatar fallbacks ─────────────────────────────────────────────────────
+.avatarFallback {
+  background: rgba(239,78,5,.18);
+  border: 2px solid rgba(239,78,5,.45);
+  color: $accent;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.avatarFallbackSmall {
+  background: rgba(239,78,5,.18);
+  border: 2px solid rgba(239,78,5,.45);
+  color: $accent;
+  font-weight: 700;
+  flex-shrink: 0;
+}

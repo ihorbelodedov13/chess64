@@ -1,0 +1,119 @@
+---
+description: Design system tokens and UI conventions for the Chess app (dark theme)
+globs: src/**/*.scss,src/**/*.tsx
+alwaysApply: false
+---
+
+# Chess App Design System
+
+## Theme: Dark
+
+The app uses a **unified dark theme**. Never introduce light backgrounds, white cards, or colorful page gradients.
+
+## Color Tokens
+
+```scss
+$bg:      #0d0d14;   // page background
+$bg2:     #161622;   // card / surface
+$bg3:     #1e1e2e;   // elevated element inside card
+$border:  rgba(255,255,255,.07);   // subtle border
+$border2: rgba(255,255,255,.12);   // hover border
+$accent:  #7c6af7;   // primary action color
+$accent-l:#a78bfa;   // accent lighter (gradients)
+$text:    #ffffff;
+$sub:     rgba(255,255,255,.45);   // secondary text
+$sub2:    rgba(255,255,255,.25);   // disabled / hint text
+
+// Semantic
+$success: #4ade80;
+$error:   #f87171;
+$warning: #fbbf24;
+$info:    #60a5fa;
+```
+
+## Layout Rules
+
+- **Page wrapper**: `background: $bg; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;`
+- **Card**: `background: $bg2; border: 1px solid $border; border-radius: 20px; padding: 40px; max-width: 480px;`
+- **Inner block** (inside card): `background: $bg3; border: 1px solid $border; border-radius: 14px;`
+- Mobile padding override (`max-width: 480px`): `padding: 28px 16px`
+
+## Typography
+
+- Headings: `font-weight: 700; letter-spacing: -.02em; color: $text`
+- Page title: `font-size: clamp(1.8rem, 7vw, 2.4rem)`
+- Card title: `font-size: clamp(1.6rem, 6vw, 2rem)`
+- Labels (uppercase): `font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: $sub`
+- Body: `color: $sub; font-size: .9rem; line-height: 1.5`
+
+## Buttons
+
+Use the shared `Button` component variants:
+
+| Variant | Use |
+|---------|-----|
+| `primary` | Main CTA — solid `$accent` background |
+| `secondary` | Secondary action — `rgba(255,255,255,.08)` bg + border |
+| `outline` | Tertiary — transparent + `$accent` border |
+| `ghost` | Destructive / back / cancel — transparent, `$sub` text |
+
+Never use colorful gradients (`#667eea → #764ba2`) for buttons — use `$accent` solid instead.
+
+## Status Colors (badges, banners, dots)
+
+```scss
+// Success banner (e.g. resume game)
+background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.25);
+
+// Error banner
+background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.2);
+
+// Warning banner (e.g. opponent disconnected)
+background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.2);
+
+// Online dot
+background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,.5);
+
+// Offline dot
+background: #6b7280;
+```
+
+## Animations
+
+- Entrances: `from { opacity: 0; transform: translateY(-6px); }` duration `.3s ease`
+- Modal popup: `from { opacity: 0; transform: scale(.94); }` duration `.18s ease`
+- Spinner: `border: 3px solid rgba(255,255,255,.08); border-top-color: $accent;`
+- Pulse: `0%,100% { opacity:1 } 50% { opacity:.5 }`
+
+## Chess Board
+
+Board square colors are **always kept as classic chess colors**:
+```scss
+.light { background-color: #f0d9b5; }
+.dark  { background-color: #b58863; }
+```
+The board wrapper uses `background: $bg2; border: 1px solid $border; border-radius: 18px;`
+
+## Icons
+
+Always use **`lucide-react`** for UI icons — never emoji or Unicode symbols in interface elements.
+
+```tsx
+import { Bot, Flag, Handshake, LogOut, Zap, Target, Plus, List, Crown, ArrowLeft, X, RefreshCw, Clock, Check, Play, Swords, ClipboardList, User, Circle, BarChart2 } from "lucide-react";
+
+// Usage inside buttons:
+<Button variant="primary"><Target size={17} style={{ marginRight: 8 }} />Найти соперника</Button>
+
+// Usage as standalone icon:
+<Flag size={32} />
+```
+
+Exceptions: chess piece glyphs **on the board** (♙ ♟ ♖ etc.) are kept as Unicode — they're game content, not UI icons.
+
+## Don'ts
+
+- ❌ White/light cards: `background: white` or `rgba(255,255,255,.95)`
+- ❌ Colorful page backgrounds: `linear-gradient(#667eea, #764ba2)` etc.
+- ❌ Dark text on light bg: `color: #333`, `color: #666` on any surface
+- ❌ Separate design tokens per page — keep tokens consistent
+- ❌ Emoji in UI: 🎯📋🤖🎮⚡🏳️ — use lucide-react icons instead

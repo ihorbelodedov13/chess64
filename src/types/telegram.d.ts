@@ -1,53 +1,7 @@
-/**
- * Типы для Telegram WebApp API
- * @see https://core.telegram.org/bots/webapps
- */
+// Telegram Mini App (WebApp) global type declarations
+// Loaded via https://telegram.org/js/telegram-web-app.js
 
-export interface TelegramWebApp {
-  initData: string;
-  initDataUnsafe: WebAppInitData;
-  version: string;
-  platform: string;
-  colorScheme: "light" | "dark";
-  themeParams: ThemeParams;
-  isExpanded: boolean;
-  viewportHeight: number;
-  viewportStableHeight: number;
-  headerColor: string;
-  backgroundColor: string;
-  isClosingConfirmationEnabled: boolean;
-  BackButton: BackButton;
-  MainButton: MainButton;
-  HapticFeedback: HapticFeedback;
-
-  ready(): void;
-  expand(): void;
-  close(): void;
-  enableClosingConfirmation(): void;
-  disableClosingConfirmation(): void;
-  showAlert(message: string, callback?: () => void): void;
-  showConfirm(message: string, callback?: (confirmed: boolean) => void): void;
-  showPopup(params: PopupParams, callback?: (buttonId: string) => void): void;
-  sendData(data: string): void;
-  openLink(url: string, options?: { try_instant_view?: boolean }): void;
-  openTelegramLink(url: string): void;
-  openInvoice(url: string, callback?: (status: string) => void): void;
-}
-
-export interface WebAppInitData {
-  query_id?: string;
-  user?: WebAppUser;
-  receiver?: WebAppUser;
-  chat?: WebAppChat;
-  chat_type?: string;
-  chat_instance?: string;
-  start_param?: string;
-  can_send_after?: number;
-  auth_date: number;
-  hash: string;
-}
-
-export interface WebAppUser {
+interface TelegramWebAppUser {
   id: number;
   is_bot?: boolean;
   first_name: string;
@@ -58,15 +12,17 @@ export interface WebAppUser {
   photo_url?: string;
 }
 
-export interface WebAppChat {
-  id: number;
-  type: string;
-  title: string;
-  username?: string;
-  photo_url?: string;
+interface TelegramWebAppInitData {
+  query_id?: string;
+  user?: TelegramWebAppUser;
+  receiver?: TelegramWebAppUser;
+  chat?: { id: number; type: string; title?: string };
+  start_param?: string;
+  auth_date: number;
+  hash: string;
 }
 
-export interface ThemeParams {
+interface TelegramWebAppThemeParams {
   bg_color?: string;
   text_color?: string;
   hint_color?: string;
@@ -76,65 +32,64 @@ export interface ThemeParams {
   secondary_bg_color?: string;
 }
 
-export interface BackButton {
-  isVisible: boolean;
-  onClick(callback: () => void): void;
-  offClick(callback: () => void): void;
-  show(): void;
-  hide(): void;
+interface TelegramWebApp {
+  /** Raw initData string — send as Bearer token to backend */
+  initData: string;
+  /** Parsed initData object */
+  initDataUnsafe: TelegramWebAppInitData;
+  version: string;
+  platform: string;
+  colorScheme: "light" | "dark";
+  themeParams: TelegramWebAppThemeParams;
+  isExpanded: boolean;
+  viewportHeight: number;
+  viewportStableHeight: number;
+  isClosingConfirmationEnabled: boolean;
+
+  /** Must be called once the Mini App is ready to be displayed */
+  ready(): void;
+  /** Expand the Mini App to full height */
+  expand(): void;
+  close(): void;
+  enableClosingConfirmation(): void;
+  disableClosingConfirmation(): void;
+  /** Open a Telegram link inside the app (e.g. t.me/share/url) */
+  openTelegramLink(url: string): void;
+
+  MainButton: {
+    text: string;
+    color: string;
+    textColor: string;
+    isVisible: boolean;
+    isActive: boolean;
+    isProgressVisible: boolean;
+    show(): void;
+    hide(): void;
+    enable(): void;
+    disable(): void;
+    showProgress(leaveActive?: boolean): void;
+    hideProgress(): void;
+    onClick(callback: () => void): void;
+    offClick(callback: () => void): void;
+  };
+
+  BackButton: {
+    isVisible: boolean;
+    show(): void;
+    hide(): void;
+    onClick(callback: () => void): void;
+    offClick(callback: () => void): void;
+  };
+
+  HapticFeedback: {
+    impactOccurred(style: "light" | "medium" | "heavy" | "rigid" | "soft"): void;
+    notificationOccurred(type: "error" | "success" | "warning"): void;
+    selectionChanged(): void;
+  };
 }
 
-export interface MainButton {
-  text: string;
-  color: string;
-  textColor: string;
-  isVisible: boolean;
-  isActive: boolean;
-  isProgressVisible: boolean;
-  setText(text: string): void;
-  onClick(callback: () => void): void;
-  offClick(callback: () => void): void;
-  show(): void;
-  hide(): void;
-  enable(): void;
-  disable(): void;
-  showProgress(leaveActive?: boolean): void;
-  hideProgress(): void;
-  setParams(params: MainButtonParams): void;
+interface Window {
+  Telegram?: {
+    WebApp: TelegramWebApp;
+  };
 }
-
-export interface MainButtonParams {
-  text?: string;
-  color?: string;
-  text_color?: string;
-  is_active?: boolean;
-  is_visible?: boolean;
-}
-
-export interface HapticFeedback {
-  impactOccurred(style: "light" | "medium" | "heavy" | "rigid" | "soft"): void;
-  notificationOccurred(type: "error" | "success" | "warning"): void;
-  selectionChanged(): void;
-}
-
-export interface PopupParams {
-  title?: string;
-  message: string;
-  buttons?: PopupButton[];
-}
-
-export interface PopupButton {
-  id?: string;
-  type?: "default" | "ok" | "close" | "cancel" | "destructive";
-  text?: string;
-}
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp: TelegramWebApp;
-    };
-  }
-}
-
-export {};

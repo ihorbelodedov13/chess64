@@ -1,162 +1,217 @@
-// Переменные
-$online-game-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-$container-bg: rgba(255, 255, 255, 0.95);
-$title-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-$border-radius: 20px;
-$box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+$bg:      #151617;
+$bg2:     #191516;
+$bg3:     #1F1A18;
+$border:  rgba(84,84,88,.45);
+$accent:  #EF4E05;
+$text:    #fff;
+$sub:     rgba(255,255,255,.5);
+$success: #4ade80;
 
-// Миксины
-@mixin page-layout {
-  min-height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-@mixin container-style {
-  background: $container-bg;
-  backdrop-filter: blur(10px);
-  border-radius: $border-radius;
-  padding: 40px;
-  box-shadow: $box-shadow;
-  text-align: center;
-  max-width: 600px;
-  width: 100%;
-}
-
-@mixin gradient-text($gradient) {
-  background: $gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-// Основные стили
 .onlineGame {
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
+  background: $bg;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px 20px 32px;
 }
+
+.topBar {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 4px 12px;
+  &.wide { max-width: 640px; }
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: $sub;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  letter-spacing: .01em;
+  transition: color .15s;
+  &:hover { color: $text; }
+}
+
+%card {
+  background: $bg2;
+  border: 1px solid $border;
+  border-radius: 20px;
+  width: 100%;
+}
+
+// ── Menu ─────────────────────────────────────────────────────────────────
 
 .onlineGameContainer {
-  background: white;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 500px;
-  width: 100%;
-}
-
-.gamesListContainer {
-  background: white;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 800px;
-  width: 100%;
+  @extend %card;
+  padding: 32px 40px 36px;
+  max-width: 480px;
+  text-align: center;
 }
 
 .onlineGameTitle {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 28px;
+  font-size: clamp(1.6rem, 6vw, 2rem);
   font-weight: 700;
+  color: $text;
+  margin: 0 0 20px;
+  letter-spacing: -.02em;
 }
 
-.onlineGameContent {
-  margin-bottom: 30px;
+.onlineGameContent { margin-bottom: 0; }
+.onlineGameButtons { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.onlineGameButton  { width: 100%; }
+
+.timeControlSection {
+  text-align: left;
+  margin-bottom: 4px;
 }
 
-.onlineGameButtons {
+.sectionLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.4);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin: 0 0 10px 2px;
+}
+
+// Locked / in-development button
+.lockedWrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  align-items: stretch;
 }
 
-.onlineGameButton {
+.lockedButton {
   width: 100%;
+  opacity: .35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  filter: grayscale(.5);
 }
 
-.friendGameSection {
-  margin-top: 20px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-
-  h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 18px;
-    font-weight: 600;
-  }
-}
-
-.friendGameInput {
+.lockedBadge {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
   display: flex;
-  gap: 10px;
   align-items: center;
-}
-
-.gameIdInput {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-
-  &:focus {
-    border-color: #667eea;
-  }
-
-  &::placeholder {
-    color: #999;
-  }
-}
-
-.backButton {
-  align-self: flex-start;
-  margin-top: 20px;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,.5);
+  background: rgba(0,0,0,.35);
+  padding: 3px 8px;
+  border-radius: 20px;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .errorMessage {
-  padding: 10px;
-  background-color: #ffebee;
-  color: #c62828;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  font-size: 14px;
+  margin-top: 14px;
+  padding: 11px 14px;
+  background: rgba(248,113,113,.12);
+  color: #f87171;
+  border: 1px solid rgba(248,113,113,.2);
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+
+// ── Matchmaking ───────────────────────────────────────────────────────────
+
+.matchmakingContainer {
+  @extend %card;
+  padding: 48px 40px;
+  max-width: 480px;
   text-align: center;
 }
 
-// Адаптивность
+.matchmakingStatus {
+  margin: 28px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255,255,255,.08);
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.statusText  { font-size: 1rem; color: $text; font-weight: 500; }
+.queueInfo   { font-size: 0.85rem; color: $sub; background: rgba(255,255,255,.05); padding: 6px 14px; border-radius: 20px; border: 1px solid $border; }
+
+// ── Games list ────────────────────────────────────────────────────────────
+
+.gamesListContainer {
+  @extend %card;
+  padding: 28px;
+  max-width: 640px;
+}
+
+// ── Resume banner ─────────────────────────────────────────────────────────
+
+.resumeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: rgba(74,222,128,.1);
+  border: 1px solid rgba(74,222,128,.25);
+  color: $text;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  animation: fadeSlideIn .3s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.resumeBannerText {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+
+  strong { display: block; font-size: 14px; font-weight: 700; color: $success; }
+  span   { display: block; font-size: 12px; color: $sub; margin-top: 2px; }
+}
+
+.resumeBannerIcon { font-size: 22px; flex-shrink: 0; color: $success; display: flex; }
+.resumeButton     { flex-shrink: 0; white-space: nowrap; }
+
+// ── Responsive ────────────────────────────────────────────────────────────
+
 @media (max-width: 768px) {
-  .onlineGameContainer {
-    padding: 20px;
-    margin: 10px;
-  }
+  .onlineGameContainer,
+  .matchmakingContainer,
+  .gamesListContainer { padding: 28px 20px; }
+}
 
-  .gamesListContainer {
-    padding: 20px;
-    margin: 10px;
-  }
-
-  .friendGameInput {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .gameIdInput {
-    width: 100%;
-  }
+@media (max-width: 480px) {
+  .onlineGame { padding: 12px 12px 24px; }
+  .onlineGameContainer, .matchmakingContainer { padding: 24px 16px; }
+  .gamesListContainer { padding: 20px 12px; }
+  .resumeBanner { flex-direction: column; align-items: stretch; gap: 10px; }
+  .resumeButton { width: 100%; text-align: center; }
 }

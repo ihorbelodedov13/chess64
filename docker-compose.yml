@@ -1,0 +1,56 @@
+services:
+
+  # ── Backend (FastAPI) ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DEV_MODE: "false"
+      API_KEY: "${API_KEY:?API_KEY is required — set it in .env}"
+      BOT_TOKEN: "${BOT_TOKEN:-}"
+      DATABASE_URL: "sqlite+aiosqlite:////app/data/chess.db"
+    volumes:
+      - chess_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/auth/me', timeout=3)\" 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Frontend (Vite → nginx) ──────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_DEV_MODE: "false"
+        VITE_X_INIT_DATA_KEY: "${API_KEY:?API_KEY is required — set it in .env}"
+        VITE_BOT_USERNAME: "${BOT_USERNAME:-}"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  # ── Telegram Bot (опционально) ────────────────────────────────────────────────
+  # Запускать отдельно когда готов WEBAPP_URL:
+  #   docker compose up bot --build
+  bot:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["python", "bot.py"]
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: "${BOT_TOKEN:-}"
+      WEBAPP_URL: "${WEBAPP_URL:-http://localhost}"
+    depends_on:
+      - frontend
+    profiles:
+      - bot   # не запускается при обычном docker compose up
+
+volumes:
+  chess_data:

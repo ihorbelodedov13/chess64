@@ -2,6 +2,9 @@ import React, { useState, useMemo } from "react";
 import { Chess } from "chess.js";
 import type { Square } from "chess.js";
 import Button from "./Button";
+import ChessPiece from "./ChessPiece";
+import type { PieceType } from "./ChessPiece";
+import { RefreshCw, LogOut } from "lucide-react";
 import styles from "./LocalGame.module.scss";
 
 interface LocalGameProps {
@@ -15,24 +18,14 @@ const LocalGame: React.FC<LocalGameProps> = ({ onBackToMenu }) => {
   const [gameOver, setGameOver] = useState(false);
   const [gameResult, setGameResult] = useState<string>("");
 
-  // Вычисляем доступные ходы для выбранной фигуры
+  const currentTurn = game.turn(); // "w" | "b"
+
   const availableMoves = useMemo(() => {
-    if (!selectedSquare) return new Set();
-
+    if (!selectedSquare) return new Set<Square>();
     const moves = new Set<Square>();
-    const piece = game.get(selectedSquare);
-
-    if (!piece) return moves;
-
-    // Получаем все возможные ходы для выбранной фигуры
-    const allMoves = game.moves({ square: selectedSquare, verbose: true });
-
-    allMoves.forEach((move) => {
-      if (typeof move === "object" && "to" in move) {
-        moves.add(move.to as Square);
-      }
+    game.moves({ square: selectedSquare, verbose: true }).forEach((move) => {
+      if (typeof move === "object" && "to" in move) moves.add(move.to as Square);
     });
-
     return moves;
   }, [selectedSquare, game]);
 
@@ -40,50 +33,29 @@ const LocalGame: React.FC<LocalGameProps> = ({ onBackToMenu }) => {
     if (gameOver) return;
 
     const piece = game.get(square);
-    const isSelected = selectedSquare === square;
     const isAvailableMove = availableMoves.has(square);
 
-    // Если кликнули на доступный ход - делаем ход
-    if (isAvailableMove) {
+    if (isAvailableMove && selectedSquare) {
       try {
-        const move = game.move({ from: selectedSquare!, to: square });
+        const move = game.move({ from: selectedSquare, to: square });
         if (move) {
-          const newGame = new Chess(game.fen());
-          setGame(newGame);
+          const next = new Chess(game.fen());
+          setGame(next);
           setMoveHistory((prev) => [...prev, move.san]);
           setSelectedSquare(null);
-
-          // Check if game is over
-          if (newGame.isGameOver()) {
+          if (next.isGameOver()) {
             setGameOver(true);
-            if (newGame.isCheckmate()) {
-              setGameResult("Шах и мат!");
-            } else if (newGame.isDraw()) {
-              setGameResult("Ничья!");
-            } else if (newGame.isStalemate()) {
-              setGameResult("Пат!");
-            }
+            if (next.isCheckmate()) setGameResult("Шах и мат!");
+            else if (next.isStalemate()) setGameResult("Пат!");
+            else setGameResult("Ничья!");
           }
         }
-      } catch (error) {
-        console.error("Invalid move:", error);
-      }
+      } catch { /* ignore invalid move */ }
       return;
     }
 
-    // Если кликнули на ту же фигуру - отменяем выбор
-    if (isSelected) {
-      setSelectedSquare(null);
-      return;
-    }
-
-    // Если кликнули на фигуру - выбираем её
-    if (piece) {
-      setSelectedSquare(square);
-      return;
-    }
-
-    // Если кликнули на пустую клетку - отменяем выбор
+    if (selectedSquare === square) { setSelectedSquare(null); return; }
+    if (piece && piece.color === currentTurn) { setSelectedSquare(square); return; }
     setSelectedSquare(null);
   };
 
@@ -95,94 +67,133 @@ const LocalGame: React.FC<LocalGameProps> = ({ onBackToMenu }) => {
     setGameResult("");
   };
 
+  const getStatusText = () => {
+    if (gameOver) return gameResult;
+    if (game.inCheck()) return `${currentTurn === "w" ? "Белые" : "Чёрные"} под шахом!`;
+    return `Ход ${currentTurn === "w" ? "белых" : "чёрных"}`;
+  };
+
+  // Move history formatted as pairs
+  const movePairs = useMemo(() => {
+    const pairs: { n: number; w?: string; b?: string }[] = [];
+    moveHistory.forEach((san, idx) => {
+      if (idx % 2 === 0) pairs.push({ n: idx / 2 + 1, w: san });
+      else if (pairs.length) pairs[pairs.length - 1].b = san;
+    });
+    return pairs;
+  }, [moveHistory]);
+
   const renderBoard = () => {
     const board = [];
     const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
-    for (let rank = 0; rank < 8; rank++) {
-      for (let file = 0; file < 8; file++) {
-        const square = (files[file] + ranks[rank]) as Square;
+    for (let r = 0; r < 8; r++) {
+      for (let f = 0; f < 8; f++) {
+        const square = (files[f] + ranks[r]) as Square;
         const piece = game.get(square);
-        const isLightSquare = (file + rank) % 2 === 0;
+        const isLight = (f + r) % 2 === 0;
         const isSelected = selectedSquare === square;
-        const isAvailableMove = availableMoves.has(square);
+        const isAvail = availableMoves.has(square);
+        const isInCheck = piece?.type === "k" && game.inCheck() && piece.color === currentTurn;
 
         board.push(
           <div
             key={square}
-            className={`${styles.square} ${
-              isLightSquare ? styles.light : styles.dark
-            } ${isSelected ? styles.selected : ""} ${
-              isAvailableMove ? styles.availableMove : ""
-            }`}
+            className={[
+              styles.square,
+              isLight ? styles.light : styles.dark,
+              isSelected ? styles.selected : "",
+              isAvail ? styles.availableMove : "",
+              isInCheck ? styles.inCheck : "",
+            ].join(" ")}
             onClick={() => handleSquareClick(square)}
           >
             {piece && (
-              <div
-                className={`${styles.piece} ${styles[piece.color]} ${
-                  styles[piece.type]
-                }`}
-              >
-                {getPieceSymbol(piece.type, piece.color)}
+              <div className={`${styles.piece} ${styles[piece.color]}`}>
+                <ChessPiece type={piece.type as PieceType} color={piece.color} />
               </div>
             )}
-            {isAvailableMove && !piece && (
-              <div className={styles.moveIndicator}></div>
-            )}
+            {isAvail && !piece && <div className={styles.moveIndicator} />}
+            {isAvail && piece && <div className={styles.captureIndicator} />}
           </div>
         );
       }
     }
-
     return board;
-  };
-
-  const getPieceSymbol = (type: string, color: string) => {
-    const symbols: Record<string, Record<string, string>> = {
-      p: { w: "♙", b: "♟" },
-      r: { w: "♖", b: "♜" },
-      n: { w: "♘", b: "♞" },
-      b: { w: "♗", b: "♝" },
-      q: { w: "♕", b: "♛" },
-      k: { w: "♔", b: "♚" },
-    };
-    return symbols[type]?.[color] || "";
   };
 
   return (
     <div className={styles.localGame}>
+      {/* Header */}
       <div className={styles.gameHeader}>
-        <h2>Игра сам с собой</h2>
-        {gameOver && <div className={styles.gameResult}>{gameResult}</div>}
+        <div className={styles.statusSide}>
+          <span
+            className={styles.turnDot}
+            style={{ background: gameOver ? "#6b7280" : currentTurn === "w" ? "#fff" : "#1a1110",
+              boxShadow: gameOver ? "none" : currentTurn === "w"
+                ? "0 0 6px rgba(255,255,255,.6)"
+                : "0 0 6px rgba(239,78,5,.6)" }}
+          />
+          <span className={styles.gameStatus}>{getStatusText()}</span>
+        </div>
+        <div className={styles.playersBadge}>
+          <span className={styles.playerW}>Белые</span>
+          <span className={styles.playerSep}>vs</span>
+          <span className={styles.playerB}>Чёрные</span>
+        </div>
       </div>
 
-      <div className={styles.boardContainer}>
-        <div className={styles.board}>{renderBoard()}</div>
-      </div>
-
-      {moveHistory.length > 0 && (
-        <div className={styles.moveHistory}>
-          <h3>История ходов</h3>
-          <div className={styles.movesList}>
-            {moveHistory.map((move, index) => (
-              <span key={index} className={styles.move}>
-                {Math.floor(index / 2) + 1}.{index % 2 === 0 ? "" : " "}
-                {move}
-              </span>
-            ))}
-          </div>
+      {/* Result banner */}
+      {gameOver && (
+        <div className={styles.resultBanner}>
+          <span className={styles.resultTitle}>{gameResult}</span>
         </div>
       )}
 
-      <div className={styles.controls}>
-        <Button variant="primary" size="medium" onClick={resetGame}>
-          Новая игра
-        </Button>
+      {/* Board */}
+      <div className={styles.gameBoard}>
+        <div className={styles.chessBoardContainer}>
+          <div className={styles.boardWrapper}>
+            <div className={styles.board}>{renderBoard()}</div>
+            <div className={styles.fileLabels}>
+              {["a","b","c","d","e","f","g","h"].map(f => (
+                <span key={f} className={styles.label}>{f}</span>
+              ))}
+            </div>
+          </div>
 
+          {movePairs.length > 0 && (
+            <div className={styles.moveHistory}>
+              <div className={styles.movesList}>
+                {movePairs.map((p) => (
+                  <div key={p.n} className={styles.moveRow}>
+                    <span className={styles.moveNumber}>{p.n}.</span>
+                    <span className={styles.movePair}>
+                      <span className={styles.moveWhite}>{p.w}</span>
+                      {p.b
+                        ? <span className={styles.moveBlack}>{p.b}</span>
+                        : <span className={styles.movePlaceholder}>…</span>
+                      }
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={styles.gameControls}>
+        {gameOver && (
+          <Button variant="primary" size="medium" onClick={resetGame}>
+            <RefreshCw size={15} style={{ marginRight: 7 }} /> Новая игра
+          </Button>
+        )}
         {onBackToMenu && (
-          <Button variant="outline" size="medium" onClick={onBackToMenu}>
-            ← Назад в меню
+          <Button variant={gameOver ? "ghost" : "outline"} size="medium" onClick={onBackToMenu}>
+            <LogOut size={15} style={{ marginRight: 7 }} /> Выйти
           </Button>
         )}
       </div>

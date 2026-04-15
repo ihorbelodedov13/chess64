@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Stockfish binary
+backend/stockfish/
+
+# Environment — never commit secrets
+.env
+.env.*
+!.env.example

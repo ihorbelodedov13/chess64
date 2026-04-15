@@ -17,6 +17,7 @@ export {
   joinGame,
   getGameInfo,
   resignGame,
+  getActiveGame,
 
   // Matchmaking
   joinMatchmaking,

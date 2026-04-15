@@ -7,11 +7,28 @@ import { useEffect } from "react";
 import { useApi } from "../hooks/useApi";
 import { getAvailableGames, joinGame } from "../core/api";
 import Button from "./Button";
-import type { GameResponse } from "../types/api";
+import { TIME_CONTROLS } from "./TimeControlPicker";
+import type { GameResponse, JoinGameResponse } from "../types/api";
+import { RefreshCw, Check, Circle, Timer } from "lucide-react";
 import styles from "./GamesList.module.scss";
 
 interface GamesListProps {
-  onGameJoined?: (gameId: number) => void;
+  onGameJoined?: (gameId: string, playerColor: string) => void;
+}
+
+/** Возвращает строку вида "5+0 · Блиц" или "10+5 · Рапид" */
+function formatTimeControl(base: number, increment: number): { label: string; category: string } {
+  const found = TIME_CONTROLS.find((t) => t.base === base && t.increment === increment);
+  if (found) return { label: found.label, category: found.category };
+  const mins = base / 60;
+  return {
+    label: `${Number.isInteger(mins) ? mins : base}+${increment}`,
+    category: "",
+  };
+}
+
+interface GamesListProps {
+  onGameJoined?: (gameId: string, playerColor: string) => void;
 }
 
 export function GamesList({ onGameJoined }: GamesListProps) {
@@ -40,25 +57,21 @@ export function GamesList({ onGameJoined }: GamesListProps) {
   }, [loadGames]);
 
   // Присоединение к игре
-  const handleJoinGame = async (gameId: number) => {
-    const result = await executeJoinGame(gameId);
+  const handleJoinGame = async (gameId: string) => {
+    const result = await executeJoinGame(gameId) as JoinGameResponse | null;
     if (result) {
       console.log("Присоединились к игре:", result);
       if (onGameJoined) {
-        onGameJoined(result.game_id);
+        onGameJoined(result.game_id, result.player_color);
       }
     }
   };
 
-  // Форматирование времени
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes} мин`;
-  };
-
   // Форматирование времени создания
   const formatCreatedAt = (dateString: string): string => {
-    const date = new Date(dateString);
+    // Сервер отдаёт время в UTC без суффикса — добавляем Z чтобы Date правильно его парсил
+    const normalized = dateString.endsWith("Z") ? dateString : dateString + "Z";
+    const date = new Date(normalized);
     const now = new Date();
     const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -101,7 +114,7 @@ export function GamesList({ onGameJoined }: GamesListProps) {
           variant="outline"
           size="small"
         >
-          {loadingGames ? "Обновление..." : "🔄 Обновить"}
+          {loadingGames ? "Обновление..." : <><RefreshCw size={13} style={{ marginRight: 5 }} />Обновить</>}
         </Button>
       </div>
 
@@ -118,7 +131,6 @@ export function GamesList({ onGameJoined }: GamesListProps) {
             game={game}
             onJoin={handleJoinGame}
             joining={joiningGame}
-            formatTime={formatTime}
             formatCreatedAt={formatCreatedAt}
           />
         ))}
@@ -130,67 +142,43 @@ export function GamesList({ onGameJoined }: GamesListProps) {
 // Отдельный компонент для карточки игры
 interface GameCardProps {
   game: GameResponse;
-  onJoin: (gameId: number) => void;
+  onJoin: (gameId: string) => void;
   joining: boolean;
-  formatTime: (seconds: number) => string;
   formatCreatedAt: (dateString: string) => string;
 }
 
-function GameCard({
-  game,
-  onJoin,
-  joining,
-  formatTime,
-  formatCreatedAt,
-}: GameCardProps) {
+function GameCard({ game, onJoin, joining, formatCreatedAt }: GameCardProps) {
   const isGameFull = game.white_player_id && game.black_player_id;
+  const tc = formatTimeControl(game.time_control.base, game.time_control.increment);
 
   return (
     <div className={`${styles.gameCard} ${isGameFull ? styles.gameFull : ""}`}>
       <div className={styles.cardHeader}>
-        <div className={styles.cardTitle}>
-          <h3 className={styles.gameTitle}>Игра #{game.id}</h3>
-          <div className={styles.gameInfo}>
-            <span>
-              📊 Статус: <strong>{game.status}</strong>
-            </span>
-            <span>
-              🎮 Тип: <strong>{game.game_type}</strong>
-            </span>
-            <span>
-              ⏰ Создана: <strong>{formatCreatedAt(game.created_at)}</strong>
-            </span>
+        <div className={styles.cardLeft}>
+          <div className={styles.tcBadge}>
+            <Timer size={12} />
+            <span className={styles.tcLabel}>{tc.label}</span>
+            {tc.category && <span className={styles.tcCategory}>{tc.category}</span>}
           </div>
+          <span className={styles.cardAge}>{formatCreatedAt(game.created_at)}</span>
         </div>
 
         {!isGameFull && (
-          <Button
-            onClick={() => onJoin(game.id)}
-            disabled={joining}
-            variant="primary"
-            size="medium"
-          >
-            {joining ? "Присоединение..." : "✓ Присоединиться"}
+          <Button onClick={() => onJoin(game.id)} disabled={joining} variant="primary" size="small">
+            {joining ? "..." : <><Check size={13} style={{ marginRight: 4 }} />Войти</>}
           </Button>
         )}
       </div>
 
-      <div className={styles.cardDetails}>
-        <div>
-          ⚪ Белые:{" "}
-          {game.white_player_id
-            ? `Игрок #${game.white_player_id}`
-            : "Ожидание..."}
+      <div className={styles.cardPlayers}>
+        <div className={styles.playerSlot}>
+          <Circle size={8} fill="white" />
+          <span>{game.white_player_id ? "Игрок" : <span className={styles.waiting}>Ждёт...</span>}</span>
         </div>
-        <div>
-          ⚫ Черные:{" "}
-          {game.black_player_id
-            ? `Игрок #${game.black_player_id}`
-            : "Ожидание..."}
-        </div>
-        <div>
-          ⏱️ Контроль времени: {formatTime(game.time_control.base)} +{" "}
-          {game.time_control.increment}с
+        <span className={styles.vs}>vs</span>
+        <div className={styles.playerSlot}>
+          <Circle size={8} fill="currentColor" style={{ opacity: 0.45 }} />
+          <span>{game.black_player_id ? "Игрок" : <span className={styles.waiting}>Ждёт...</span>}</span>
         </div>
       </div>
 

@@ -1,0 +1,97 @@
+$bg3:    #1F1A18;
+$border: rgba(84,84,88,.45);
+$accent: #EF4E05;
+$text:   #fff;
+$sub:    rgba(255,255,255,.5);
+$sub2:   rgba(255,255,255,.28);
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.groupLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: $sub2;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding-left: 2px;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.option {
+  padding: 7px 13px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: $bg3;
+  color: $text;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, box-shadow .18s, color .18s;
+  letter-spacing: .02em;
+
+  &:hover:not(.active) {
+    border-color: rgba(239,78,5,.45);
+    background: rgba(239,78,5,.06);
+    color: #fff;
+  }
+
+  &.active {
+    border-color: $accent;
+    background: rgba(239,78,5,.14);
+    box-shadow: 0 0 0 2px rgba(239,78,5,.2);
+    color: #fff;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(84,84,88,.35);
+  border-radius: 11px;
+  margin-top: 2px;
+  animation: fadeIn .18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.infoName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .02em;
+}
+
+.infoDesc {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,.55);
+}
+
+.infoRule {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,.32);
+  line-height: 1.4;
+  margin-top: 2px;
+}

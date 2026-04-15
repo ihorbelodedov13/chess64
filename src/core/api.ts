@@ -10,14 +10,18 @@ import type {
   GameResponse,
   JoinGameResponse,
   CreateBotGameRequest,
+  ActiveGameResponse,
+  PublicUserResponse,
+  GameHistoryEntry,
+  FriendRequest,
 } from "../types/api";
 
 // Базовая конфигурация API
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-const API_KEY =
-  import.meta.env.VITE_X_INIT_DATA_KEY ||
-  "c7fdac45-3d59-4865-9671-f72c0fac468b";
+// Если VITE_API_BASE_URL не задан — используем относительные URL,
+// чтобы запросы шли на тот же хост, с которого загружен фронтенд (nginx proxy).
+// Это работает корректно как в Docker, так и через ngrok или любой другой домен.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+const API_KEY = import.meta.env.VITE_X_INIT_DATA_KEY || "";
 const API_PREFIX = "/api/v1";
 
 // Создание axios instance
@@ -97,7 +101,9 @@ api.interceptors.request.use(
     const initData = getTelegramInitData() || getCachedInitData();
     if (initData) {
       // Авторизация через Telegram initData в заголовке Authorization
-      config.headers.Authorization = initData;
+      // Формат: Bearer <telegram_init_data_token>
+      const token = initData.startsWith("Bearer ") ? initData : `Bearer ${initData}`;
+      config.headers.Authorization = token;
     }
 
     return config;
@@ -163,6 +169,12 @@ export const fetchUserStats = (userId: number) =>
 // ============================================
 
 /**
+ * Получение активной игры текущего пользователя (для переподключения после перезагрузки)
+ */
+export const getActiveGame = () =>
+  api.get<ActiveGameResponse | null>(`${API_PREFIX}/game/active`);
+
+/**
  * Получение списка доступных для присоединения игр
  */
 export const getAvailableGames = () =>
@@ -170,9 +182,10 @@ export const getAvailableGames = () =>
 
 /**
  * Создание новой игры для присоединения других игроков
+ * @param isPrivate — если true, игра не видна в публичном списке (только по инвайт-ссылке)
  */
-export const createGame = () =>
-  api.post<GameResponse>(`${API_PREFIX}/game/create`);
+export const createGame = (isPrivate = false) =>
+  api.post<GameResponse>(`${API_PREFIX}/game/create`, { is_private: isPrivate });
 
 /**
  * Создание игры с ботом
@@ -181,21 +194,27 @@ export const createBotGame = (data: CreateBotGameRequest) =>
   api.post<GameResponse>(`${API_PREFIX}/game/create/bot`, data);
 
 /**
+ * Отмена ожидающей игры (только создатель)
+ */
+export const cancelGame = (gameId: string) =>
+  api.post(`${API_PREFIX}/game/${gameId}/cancel`);
+
+/**
  * Присоединение к существующей игре
  */
-export const joinGame = (gameId: number) =>
+export const joinGame = (gameId: string) =>
   api.post<JoinGameResponse>(`${API_PREFIX}/game/${gameId}/join`);
 
 /**
  * Получение информации об игре
  */
-export const getGameInfo = (gameId: number) =>
+export const getGameInfo = (gameId: string) =>
   api.get(`${API_PREFIX}/game/${gameId}`);
 
 /**
  * Сдача в игре
  */
-export const resignGame = (gameId: number) =>
+export const resignGame = (gameId: string) =>
   api.post(`${API_PREFIX}/game/${gameId}/resign`);
 
 // ============================================
@@ -205,8 +224,8 @@ export const resignGame = (gameId: number) =>
 /**
  * Вход в очередь автоматического подбора соперника
  */
-export const joinMatchmaking = () =>
-  api.post(`${API_PREFIX}/game/matchmaking/join`);
+export const joinMatchmaking = (timeControl?: { base: number; increment: number }) =>
+  api.post(`${API_PREFIX}/game/matchmaking/join`, timeControl ? { time_control: timeControl } : {});
 
 /**
  * Выход из очереди матчмейкинга
@@ -228,6 +247,43 @@ export const getMatchmakingStatus = () =>
  * Проверка здоровья сервера
  */
 export const healthCheck = () => api.get("/health");
+
+// ============================================
+// SOCIAL — FRIENDS & GAME HISTORY
+// ============================================
+
+export const fetchMyFriends = () =>
+  api.get<PublicUserResponse[]>(`${API_PREFIX}/users/me/friends`);
+
+export const fetchMyFriendRequests = () =>
+  api.get<FriendRequest[]>(`${API_PREFIX}/users/me/friend-requests`);
+
+export const fetchMyGames = (limit = 30, offset = 0) =>
+  api.get<GameHistoryEntry[]>(`${API_PREFIX}/users/me/games`, { params: { limit, offset } });
+
+export const fetchPublicProfile = (userId: number) =>
+  api.get<PublicUserResponse>(`${API_PREFIX}/users/${userId}`);
+
+export const fetchUserGames = (userId: number, limit = 30, offset = 0) =>
+  api.get<GameHistoryEntry[]>(`${API_PREFIX}/users/${userId}/games`, { params: { limit, offset } });
+
+export const sendFriendRequest = (userId: number) =>
+  api.post(`${API_PREFIX}/users/${userId}/friend`);
+
+export const acceptFriendRequest = (userId: number) =>
+  api.post(`${API_PREFIX}/users/${userId}/friend/accept`);
+
+export const declineFriendRequest = (userId: number) =>
+  api.post(`${API_PREFIX}/users/${userId}/friend/decline`);
+
+export const removeFriend = (userId: number) =>
+  api.delete(`${API_PREFIX}/users/${userId}/friend`);
+
+export const inviteUserToGame = (targetUserId: number) =>
+  api.post<GameResponse>(`${API_PREFIX}/game/invite/${targetUserId}`);
+
+export const updateFrame = (frame: number) =>
+  api.patch<UserResponse>(`${API_PREFIX}/auth/me/frame`, { frame });
 
 // Экспорт axios instance для продвинутого использования
 export default api;

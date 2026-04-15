@@ -1,81 +1,64 @@
-// Переменные
-$misc-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-$container-bg: rgba(255, 255, 255, 0.95);
-$title-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-$border-radius: 20px;
-$box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+$bg:     #151617;
+$bg2:    #191516;
+$border: rgba(84,84,88,.45);
+$text:   #fff;
+$sub:    rgba(255,255,255,.5);
 
-// Миксины
-@mixin page-layout {
-  min-height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-@mixin container-style {
-  background: $container-bg;
-  backdrop-filter: blur(10px);
-  border-radius: $border-radius;
-  padding: 40px;
-  box-shadow: $box-shadow;
-  text-align: center;
-  max-width: 600px;
-  width: 100%;
-}
-
-@mixin gradient-text($gradient) {
-  background: $gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-// Основные стили
 .misc {
-  @include page-layout;
-  background: $misc-gradient;
+  min-height: 100vh;
+  width: 100%;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px 32px;
+}
+
+.topBar {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 4px 12px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: $sub;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  letter-spacing: .01em;
+  transition: color .15s;
+  &:hover { color: $text; }
 }
 
 .miscContainer {
-  @include container-style;
+  background: $bg2;
+  border: 1px solid $border;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
 }
 
 .miscTitle {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 7vw, 2.4rem);
   font-weight: 700;
-  margin-bottom: 20px;
-  @include gradient-text($title-gradient);
+  margin-bottom: 28px;
+  color: $text;
+  letter-spacing: -.02em;
 }
 
-.miscContent {
-  margin-bottom: 30px;
-}
+.miscContent { margin-bottom: 24px; color: $sub; }
+.miscButtons { display: flex; flex-direction: column; gap: 12px; }
+.miscButton  { width: 100%; }
 
-.miscButtons {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.miscButton {
-  width: 100%;
-}
-
-.backButton {
-  margin-top: 20px;
-}
-
-// Адаптивность
-@media (max-width: 600px) {
-  .miscContainer {
-    padding: 30px 20px;
-  }
-
-  .miscTitle {
-    font-size: 2rem;
-  }
+@media (max-width: 480px) {
+  .misc { padding: 12px 12px 24px; }
+  .miscContainer { padding: 28px 16px; }
 }

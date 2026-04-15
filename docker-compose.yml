@@ -31,7 +31,7 @@ services:
         VITE_BOT_USERNAME: "${BOT_USERNAME:-}"
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - backend
 
